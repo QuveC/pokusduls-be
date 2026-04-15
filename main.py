@@ -40,8 +40,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-# ❌ JANGAN PAKE (udah bikin manual di MySQL)
-# Base.metadata.create_all(bind=engine)
+
 
 # =========================
 # SCHEMA
