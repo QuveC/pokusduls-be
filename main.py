@@ -8,9 +8,6 @@ from hashlib import sha256
 
 app = FastAPI()
 
-# =========================
-# CORS (WAJIB)
-# =========================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,18 +16,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =========================
-# DATABASE
-# =========================
 DATABASE_URL = "mysql+pymysql://root:@localhost/drowsiness_study_app"
 
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(bind=engine)
 Base = declarative_base()
 
-# =========================
-# MODEL (SESUAI MYSQL)
-# =========================
 class User(Base):
     __tablename__ = "users"
 
@@ -47,16 +38,13 @@ class User(Base):
 # =========================
 class UserRegister(BaseModel):
     username: str
-    email: str   # ✅ TANPA EmailStr biar ga error
+    email: str   
     password: str
 
 class UserLogin(BaseModel):
     username: str
     password: str
 
-# =========================
-# UML BASE (PUNYA LU - TIDAK DIUBAH)
-# =========================
 
 # ----- MODEL -----
 class SessionData:
@@ -144,7 +132,6 @@ def root():
 def register(user: UserRegister):
     db = SessionLocal()
 
-    # cek username/email
     existing = db.query(User).filter(
         (User.username == user.username) |
         (User.email == user.email)
@@ -175,7 +162,6 @@ def register(user: UserRegister):
 def login(user: UserLogin):
     db = SessionLocal()
 
-    # ambil user berdasarkan username aja
     found = db.query(User).filter(
         User.username == user.username
     ).first()
@@ -184,10 +170,8 @@ def login(user: UserLogin):
         db.close()
         raise HTTPException(status_code=401, detail="Username tidak ditemukan")
 
-    # hash password input
     hashed_input = hash_password(user.password)
 
-    # bandingkan manual
     if hashed_input != found.password_hash:
         db.close()
         raise HTTPException(status_code=401, detail="Password salah")
