@@ -1,12 +1,43 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
-from sqlalchemy.orm import sessionmaker, declarative_base
-from datetime import datetime
-from hashlib import sha256
+from fastapi.exceptions import RequestValidationError
+from sqlalchemy.exc import SQLAlchemyError
 
-app = FastAPI()
+# DATABASE
+from database.connection import (
+    Base,
+    engine
+)
+
+# ROUTES
+from routes import (
+    auth_routes,
+    session_routes,
+    monitoring_routes,
+    statistics_routes,
+    chat_routes
+)
+
+# EXCEPTION HANDLER
+from utils.exception_handler import (
+    validation_exception_handler,
+    sqlalchemy_exception_handler,
+    http_exception_handler
+)
+
+# =====================================
+# FASTAPI APP
+# =====================================
+
+app = FastAPI(
+    title="PokusDuls API",
+    description="Backend API for Smart Study Assistant",
+    version="1.0.0"
+)
+
+# =====================================
+# CORS
+# =====================================
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,169 +47,89 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATABASE_URL = "mysql+pymysql://root:@localhost/drowsiness_study_app"
+# =====================================
+# DATABASE CREATE TABLE
+# =====================================
 
-engine = create_engine(DATABASE_URL, echo=True)
-SessionLocal = sessionmaker(bind=engine)
-Base = declarative_base()
+Base.metadata.create_all(bind=engine)
 
-class User(Base):
-    __tablename__ = "users"
+# =====================================
+# GLOBAL EXCEPTION HANDLER
+# =====================================
 
-    user_id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(100), unique=True, nullable=False)
-    email = Column(String(150), unique=True, nullable=False)
-    password_hash = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+app.add_exception_handler(
+    RequestValidationError,
+    validation_exception_handler
+)
 
+app.add_exception_handler(
+    SQLAlchemyError,
+    sqlalchemy_exception_handler
+)
 
+app.add_exception_handler(
+    HTTPException,
+    http_exception_handler
+)
 
-# =========================
-# SCHEMA
-# =========================
-class UserRegister(BaseModel):
-    username: str
-    email: str   
-    password: str
+# =====================================
+# INCLUDE ROUTES
+# =====================================
 
-class UserLogin(BaseModel):
-    username: str
-    password: str
+app.include_router(
+    auth_routes.router,
+    tags=["Authentication"]
+)
 
+app.include_router(
+    session_routes.router,
+    tags=["Session"]
+)
 
-# ----- MODEL -----
-class SessionData:
-    def __init__(self, duration: int, methodType: str, timestamp: datetime):
-        self.duration = duration
-        self.methodType = methodType
-        self.timestamp = timestamp
+app.include_router(
+    monitoring_routes.router,
+    tags=["Monitoring"]
+)
 
+app.include_router(
+    statistics_routes.router,
+    tags=["Statistics"]
+)
 
-class UserStatistics:
-    def __init__(self, totalXP: int, currentStreak: int):
-        self.totalXP = totalXP
-        self.currentStreak = currentStreak
+app.include_router(
+    chat_routes.router,
+    tags=["Chatbot"]
+)
 
-
-# ----- CONTROLLER -----
-class SessionController:
-    def startFeynmanSession(self):
-        pass
-
-    def validateDuration(self):
-        pass
-
-
-class TimerController:
-    def startTimer(self):
-        pass
-
-    def pauseTimer(self):
-        pass
-
-    def stopTimer(self):
-        pass
-
-
-class GamificationEngine:
-    def calculateXP(self):
-        pass
-
-    def updateStreak(self):
-        pass
-
-
-class DatabaseHandler:
-    def saveSession(self):
-        pass
-
-    def fetchUserStats(self):
-        pass
-
-
-# ----- VIEW -----
-class HomePageUI:
-    pass
-
-class FeynmanSessionUI:
-    pass
-
-class TimerRunningUI:
-    pass
-
-class SessionCompleteDialog:
-    pass
-
-class StatisticsUI:
-    pass
-
-
-# =========================
-# HELPER
-# =========================
-def hash_password(password: str):
-    return sha256(password.encode()).hexdigest()
-
-# =========================
-# ROUTES
-# =========================
+# =====================================
+# ROOT ENDPOINT
+# =====================================
 
 @app.get("/")
 def root():
-    return {"message": "API Running 🚀"}
+    return {
+        "success": True,
+        "message": "PokusDuls Running "
+    }
 
+# =====================================
+# HEALTH CHECK
+# =====================================
 
-@app.post("/register")
-def register(user: UserRegister):
-    db = SessionLocal()
+@app.get("/health")
+def health_check():
+    return {
+        "status": "OK",
+        "database": "connected"
+    }
 
-    existing = db.query(User).filter(
-        (User.username == user.username) |
-        (User.email == user.email)
-    ).first()
+# =====================================
+# TEST ERROR ENDPOINT
+# =====================================
 
-    if existing:
-        db.close()
-        raise HTTPException(status_code=400, detail="Username atau Email sudah dipakai")
-
-    new_user = User(
-        username=user.username,
-        email=user.email,
-        password_hash=hash_password(user.password)
+@app.get("/test-error")
+def test_error():
+    raise HTTPException(
+        status_code=400,
+        detail="Test Error Handler"
     )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    db.close()
-
-    return {
-        "message": "Register berhasil",
-        "user_id": new_user.user_id
-    }
-
-
-@app.post("/login")
-def login(user: UserLogin):
-    db = SessionLocal()
-
-    found = db.query(User).filter(
-        User.username == user.username
-    ).first()
-
-    if not found:
-        db.close()
-        raise HTTPException(status_code=401, detail="Username tidak ditemukan")
-
-    hashed_input = hash_password(user.password)
-
-    if hashed_input != found.password_hash:
-        db.close()
-        raise HTTPException(status_code=401, detail="Password salah")
-
-    db.close()
-
-    return {
-        "message": "Login berhasil",
-        "user_id": found.user_id
-    }
