@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "mysql+pymysql://root:@localhost/drowsiness_study_app"
+#catatan database url saat ini adalah database local ubah url database ke url masing masing atau pakai database yang di deploy ke server
+DATABASE_URL = "mysql+pymysql://root:@localhost/drowsiness_study_app" 
 
 engine = create_engine(DATABASE_URL)
 
