@@ -2,6 +2,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
+from pydantic import BaseModel
+
+from database.connection import engine
+
+from models.user import Base, User
+
+app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
 
 # DATABASE
 from database.connection import (
@@ -109,7 +118,7 @@ app.include_router(
 def root():
     return {
         "success": True,
-        "message": "PokusDuls Running "
+        "message": "PokusDuls Backend Running 🚀"
     }
 
 # =====================================
@@ -133,3 +142,28 @@ def test_error():
         status_code=400,
         detail="Test Error Handler"
     )
+    
+class UserRegister(BaseModel):
+    username: str
+    email: str
+    password: str
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+@app.post("/register")
+def register(user: UserRegister):
+
+    return {
+        "message": "Register berhasil",
+        "user_id": 1
+    }
+
+@app.post("/login")
+def login(user: UserLogin):
+
+    return {
+        "message": "Login berhasil",
+        "user_id": 1
+    }
