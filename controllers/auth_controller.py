@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from models.user import User
 from utils.security import (
     hash_password,
@@ -14,7 +15,10 @@ class AuthController:
         ).first()
 
         if existing:
-            raise Exception("Username already exists")
+            raise HTTPException(
+                status_code=400,
+                detail="Username sudah digunakan"
+            )
 
         new_user = User(
             username=user.username,
@@ -27,7 +31,7 @@ class AuthController:
         db.refresh(new_user)
 
         return {
-            "message": "Register success",
+            "message": "Registrasi berhasil! Silakan login.",
             "user_id": new_user.user_id
         }
 
@@ -38,7 +42,10 @@ class AuthController:
         ).first()
 
         if not found:
-            raise Exception("User not found")
+            raise HTTPException(
+                status_code=401,
+                detail="Username atau password salah"
+            )
 
         valid = verify_password(
             user.password,
@@ -46,13 +53,17 @@ class AuthController:
         )
 
         if not valid:
-            raise Exception("Wrong password")
+            raise HTTPException(
+                status_code=401,
+                detail="Username atau password salah"
+            )
 
         token = create_access_token(
             {"sub": found.username}
         )
 
         return {
+            "message": "Login berhasil! Selamat datang.",
             "token": token,
             "user_id": found.user_id
         }
