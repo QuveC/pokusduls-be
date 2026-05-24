@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from database.connection import SessionLocal
 from controllers.auth_controller import AuthController
 from schemas.user_schema import (
@@ -19,6 +19,12 @@ def register(user: UserRegister):
     try:
         return controller.register(db, user)
 
+    except HTTPException:
+        raise  # teruskan HTTPException apa adanya ke FastAPI
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     finally:
         db.close()
 
@@ -30,6 +36,12 @@ def login(user: UserLogin):
 
     try:
         return controller.login(db, user)
+
+    except HTTPException:
+        raise  # teruskan HTTPException apa adanya ke FastAPI
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
     finally:
         db.close()
