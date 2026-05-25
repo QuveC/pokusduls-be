@@ -4,4 +4,13 @@ sqlalchemy
 pymysql
 python-jose
 passlib[bcrypt]
+<<<<<<< HEAD
 python-multipart
+=======
+python-multipart
+ultralytics
+mediapipe
+opencv-python
+pillow
+numpy
+>>>>>>> 1925e27 (Penambahan YOLO)
