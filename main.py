@@ -134,27 +134,4 @@ def test_error():
         detail="Test Error Handler"
     )
     
-class UserRegister(BaseModel):
-    username: str
-    email: str
-    password: str
 
-class UserLogin(BaseModel):
-    username: str
-    password: str
-
-@app.post("/register")
-def register(user: UserRegister):
-
-    return {
-        "message": "Register berhasil",
-        "user_id": 1
-    }
-
-@app.post("/login")
-def login(user: UserLogin):
-
-    return {
-        "message": "Login berhasil",
-        "user_id": 1
-    }

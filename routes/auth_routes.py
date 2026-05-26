@@ -20,7 +20,7 @@ def register(user: UserRegister):
         return controller.register(db, user)
 
     except HTTPException:
-        raise  # teruskan HTTPException apa adanya ke FastAPI
+        raise 
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
