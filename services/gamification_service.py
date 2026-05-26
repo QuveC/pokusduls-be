@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 class GamificationService:
 
     def calculate_xp(self, duration, drowsy_count):
@@ -9,16 +8,4 @@ class GamificationService:
         return max(0, xp - penalty)
 
     def update_streak(self, current_streak):
-=======
-class GamificationService:
-
-    def calculate_xp(self, duration, drowsy_count):
-        xp = duration * 10
-
-        penalty = drowsy_count * 5
-
-        return max(0, xp - penalty)
-
-    def update_streak(self, current_streak):
->>>>>>> 1925e27 (Penambahan YOLO)
         return current_streak + 1

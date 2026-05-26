@@ -4,19 +4,10 @@ from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from pydantic import BaseModel
 
-from database.connection import engine
-
-from models.user import Base, User
+from database.connection import Base, engine
+from models.user import User
 
 app = FastAPI()
-
-Base.metadata.create_all(bind=engine)
-
-# DATABASE
-from database.connection import (
-    Base,
-    engine
-)
 
 # ROUTES
 from routes import (

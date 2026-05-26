@@ -1,9 +1,5 @@
 from fastapi import APIRouter
-<<<<<<< HEAD
-from controllers.monitoring_controller import MonitoringController
-=======
 from controllers.monitoring_controller import MonitoringController, FrameInput
->>>>>>> 1925e27 (Penambahan YOLO)
 
 router = APIRouter()
 
@@ -12,9 +8,6 @@ controller = MonitoringController()
 
 @router.get("/monitoring/detect")
 def detect_drowsiness():
-<<<<<<< HEAD
-    return controller.detect_drowsiness()
-=======
     return controller.detect_drowsiness()
 
 
@@ -34,4 +27,3 @@ def get_model_classes():
     Buka di browser: http://localhost:8000/monitoring/debug/classes
     """
     return controller.yolo.get_model_classes()
->>>>>>> 1925e27 (Penambahan YOLO)
