@@ -4,17 +4,31 @@ from controllers.chat_controller import ChatController
 from schemas.chat_schema import ChatRequest
 
 router = APIRouter()
-
 controller = ChatController()
 
 
 @router.post("/chat/send")
 def send_message(data: ChatRequest):
-
     db = SessionLocal()
-
     try:
         return controller.send_message(db, data)
+    finally:
+        db.close()
 
+
+@router.get("/chat/history/{user_id}")
+def get_history(user_id: int):
+    db = SessionLocal()
+    try:
+        return controller.get_history(db, user_id)
+    finally:
+        db.close()
+
+
+@router.delete("/chat/history/{user_id}")
+def clear_history(user_id: int):
+    db = SessionLocal()
+    try:
+        return controller.clear_history(db, user_id)
     finally:
         db.close()
