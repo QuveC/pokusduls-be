@@ -4,15 +4,13 @@ from database.connection import Base
 
 
 class SessionData(Base):
-    """Diagram: SessionData — duration, methodType, timestamp, chatSessionId, drowsyCount, monitoringEnabled"""
-    __tablename__ = "sessions"
+    __tablename__ = "session_data"
 
-    session_id         = Column(Integer,  primary_key=True, index=True)
+    session_id         = Column(Integer,     primary_key=True, index=True)
     user_id            = Column(Integer)
-    method_type        = Column(String(50))                          # diagram: methodType
+    method_type        = Column(String(50))
     duration           = Column(Integer)
-    xp_earned          = Column(Integer)
-    drowsy_count       = Column(Integer,  default=0)                 # diagram: drowsyCount
-    monitoring_enabled = Column(Boolean,  default=False)             # diagram: monitoringEnabled
-    chat_session_id    = Column(String(100), nullable=True)          # diagram: chatSessionId
-    created_at         = Column(DateTime, default=datetime.utcnow)   # diagram: timestamp
+    drowsy_count       = Column(Integer,     default=0)
+    monitoring_enabled = Column(Boolean,     default=False)
+    chat_session_id    = Column(String(100), nullable=True)
+    timestamp          = Column(DateTime,    default=datetime.utcnow)

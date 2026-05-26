@@ -18,22 +18,23 @@ class SessionController:
             user_id=data.user_id,
             method_type=data.method_type,
             duration=data.duration,
-            xp_earned=xp,
             drowsy_count=drowsy_count,
             monitoring_enabled=getattr(data, 'monitoring_enabled', False),
             chat_session_id=getattr(data, 'chat_session_id', None),
         )
         db.add(session)
 
-        # Update statistics (total_sessions + XP + streak)
-        stats = db.query(Statistics).filter(Statistics.user_id == data.user_id).first()
+        # Update user_statistics
+        stats = db.query(Statistics).filter(
+            Statistics.user_id == data.user_id
+        ).first()
         today = date.today()
+
         if not stats:
             stats = Statistics(
                 user_id=data.user_id,
                 total_xp=0,
                 current_streak=0,
-                total_sessions=0,
                 total_drowsy_events=0,
                 avg_focus_score=0.0,
                 chat_interactions=0,
@@ -41,14 +42,8 @@ class SessionController:
             db.add(stats)
             db.flush()
 
-        stats.total_xp       = (stats.total_xp or 0) + xp
-        stats.total_sessions = (stats.total_sessions or 0) + 1
+        stats.total_xp           = (stats.total_xp or 0) + xp
         stats.total_drowsy_events = (stats.total_drowsy_events or 0) + drowsy_count
-        stats.current_streak = self.game.update_streak(
-            stats.current_streak or 0,
-            stats.last_active_date
-        )
-        stats.last_active_date = today
 
         db.commit()
         db.refresh(session)
@@ -57,5 +52,4 @@ class SessionController:
             "message":    "Session Complete",
             "xp":         xp,
             "session_id": session.session_id,
-            "streak":     stats.current_streak,
         }
