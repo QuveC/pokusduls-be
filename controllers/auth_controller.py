@@ -65,5 +65,6 @@ class AuthController:
         return {
             "message": "Login berhasil! Selamat datang.",
             "token": token,
-            "user_id": found.user_id
+            "user_id": found.user_id,
+            "is_premium": bool(found.is_premium)
         }

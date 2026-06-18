@@ -15,7 +15,8 @@ from routes import (
     session_routes,
     monitoring_routes,
     statistics_routes,
-    chat_routes
+    chat_routes,
+    premium_routes
 )
 
 # EXCEPTION HANDLER
@@ -99,6 +100,11 @@ app.include_router(
 app.include_router(
     chat_routes.router,
     tags=["Chatbot"]
+)
+
+app.include_router(
+    premium_routes.router,
+    tags=["Premium"]
 )
 
 # =====================================
